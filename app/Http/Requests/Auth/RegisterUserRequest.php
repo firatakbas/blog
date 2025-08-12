@@ -24,6 +24,7 @@ class RegisterUserRequest extends FormRequest
         return [
             'name'     => 'required',
             'email'    => 'required|email',
+            'username' => 'required',
             'password' => 'required',
         ];
     }
@@ -33,6 +34,7 @@ class RegisterUserRequest extends FormRequest
         return [
             'name.required'     => "Ad ve Soyad zorunludur.",
             'email.required'    => "E-posta zorunludur.",
+            'username.required' => "Kullanıcı adı zorunludur.",
             'password.required' => "Parola zorunludur.",
         ];
     }

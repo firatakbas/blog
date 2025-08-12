@@ -18,13 +18,7 @@ class AuthController extends Controller
 
     public function store(RegisterUserRequest $request)
     {
-        $user = $this->authService->create($request->name, $request->email, $request->password);
-
-        if (!$user) {
-            return response()->json([
-                'errors' => 'Bu e-posta kayıtlı',
-            ], 422);
-        }
+        $user = $this->authService->create($request->name, $request->email, $request->username, $request->password);
 
         return response()->json([
             'message' => 'Kullanıcı kayıt oldu',
@@ -35,12 +29,6 @@ class AuthController extends Controller
     public function login(LoginUserRequest $request)
     {
         $user = $this->authService->login($request->email, $request->password);
-
-        if (!$user) {
-            return response()->json([
-                'error' => 'E-posta veya şifre bilgisi yanlış',
-            ], 422);
-        }
 
         $token = $user->createToken($user->email)->plainTextToken;
 
@@ -53,12 +41,6 @@ class AuthController extends Controller
     public function logout()
     {
         $user = $this->authService->logout();
-
-        if (!$user) {
-            return response()->json([
-                'error' => 'Kullanıcı bulunamadı veya zaten çıkış yapılmış',
-            ], 401);
-        }
 
         return response()->json([
             'message' => 'Başarılı bir şekide çıkış yapıldı',

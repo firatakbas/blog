@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Repositories\AuthRepository;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\ValidationException;
 
 class AuthService
 {
@@ -14,17 +15,21 @@ class AuthService
         $this->authRepository = $authRepository;
     }
 
-    public function create(string $name, string $email, string $password)
+    public function create(string $name, string $email, string $username, string $password)
     {
-        $user = $this->authRepository->getByEmail($email);
-
-        if ($user) {
-            return false;
+        if ($this->authRepository->getByEmail($email)) {
+            throw ValidationException::withMessages([
+                'email' => ['Bu e-posta kayıtlı'],
+            ]);
         }
 
-        $user = $this->authRepository->create($name, $email, $password);
+        if ($this->authRepository->getByUsername($username)) {
+            throw ValidationException::withMessages([
+                'username' => ['Kullanıcı adı alınmış'],
+            ]);
+        }
 
-        return $user;
+        return $this->authRepository->create($name, $email, $username, $password);
     }
 
     public function login(string $email, string $password)
@@ -32,7 +37,9 @@ class AuthService
         $user = $this->authRepository->getByEmail($email);
 
         if (!$user || !Hash::check($password, $user->password)) {
-            return false;
+            throw ValidationException::withMessages([
+                'error' => 'E-posta veya şifre bilgisi yanlış',
+            ]);
         }
 
         return $user;
@@ -43,7 +50,9 @@ class AuthService
         $user = auth()->user();
 
         if (!$user) {
-            return false;
+            throw ValidationException::withMessages([
+                'error' => 'Kullanıcı bulunamadı veya zaten çıkış yapılmış',
+            ]);
         }
 
         $user->currentAccessToken()?->delete();
